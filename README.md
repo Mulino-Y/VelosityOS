@@ -1,1 +1,1 @@
-# VelosityOS
+# Velosity
