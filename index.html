@@ -1,38 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Velocity - Windows Optimization Simplified</title>
+    <meta name="description"
+        content="Velocity — professional Windows 10/11 optimization. Clean, boost, and optimize your PC for peak performance.">
+    <title>Velocity — Windows Optimization Simplified</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <nav class="navbar">
         <a href="index.html" class="navbar-logo">Velocity</a>
         <div class="nav-links">
             <a href="index.html" class="nav-button">Home</a>
-            <a href="how-to-use/index.html" class="nav-button">How to use</a>
-            <a href="how-to-install/index.html" class="nav-button">How to install</a>
-            <a href="https://github.com/Mulino-Y/Velocity/releases/download/v4.2/velocity_setup.exe" class="nav-button">Download</a>
+            <a href="how-to-use/index.html" class="nav-button">How to Use</a>
+            <a href="how-to-install/index.html" class="nav-button">How to Install</a>
+            <a href="download/index.html" class="nav-button" id="navDownloadBtn" style="display:none;">Download</a>
+            <a href="profile/index.html" class="nav-button nav-profile" id="navProfileBtn"
+                style="display:none;">Profile</a>
+            <a href="#" class="nav-button nav-logout" id="navLogoutBtn" style="display:none;" onclick="logoutUser()">Log
+                Out</a>
+            <a href="auth/index.html#login" class="nav-button nav-login" id="navLoginBtn">Log In</a>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
         </div>
     </nav>
 
     <section class="hero">
         <div class="hero-content">
-            <h1>Optimize Your Windows Experience</h1>
-            <p>Velocity is your ultimate solution for optimizing your Windows system. Clean, boost, and optimize your computer for peak performance with professionally-designed tools.</p>
-            <button class="download-btn" onclick="downloadFile()">Download Now</button>
+            <span class="hero-badge fade-in">✦ Windows 10 / 11 Optimizer</span>
+            <h1 class="fade-in fade-in-delay-1">
+                Optimize Your<br><span class="gradient-text">Windows Experience</span>
+            </h1>
+            <p class="fade-in fade-in-delay-2">Velocity is your ultimate solution for optimizing your Windows system.
+                Clean junk, boost performance, and unlock your PC's full potential — all in one click.</p>
+            <div class="fade-in fade-in-delay-3" style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+                <button class="btn-primary" id="downloadNowBtn">⬇ Download Now</button>
+                <a href="how-to-use/index.html" class="btn-secondary">Learn More →</a>
+            </div>
         </div>
     </section>
 
+    <section class="features">
+        <div class="features-header">
+            <h2>Why Choose Velocity?</h2>
+            <p>Professional-grade tools designed for Windows power users.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card fade-in">
+                <div class="feature-icon">🧹</div>
+                <h3>Deep Clean</h3>
+                <p>Remove junk files, temp caches, and leftover data that slow down your system over time.</p>
+            </div>
+            <div class="feature-card fade-in fade-in-delay-1">
+                <div class="feature-icon">⚡</div>
+                <h3>Performance Boost</h3>
+                <p>Optimize RAM usage, manage startup programs, and fine-tune system settings for maximum speed.</p>
+            </div>
+            <div class="feature-card fade-in fade-in-delay-2">
+                <div class="feature-icon">🎮</div>
+                <h3>Game Mode</h3>
+                <p>Prioritize game processes, suspend background apps, and switch to high-performance power plans
+                    instantly.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="registration" id="register">
+        <h2>Get Your License</h2>
+        <p class="reg-subtitle">Register below to receive a free 7-day trial license key.</p>
+        <div class="registration-card">
+            <form id="registrationForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" placeholder="Your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+1 234 567 8900" required>
+                </div>
+                <button type="submit" class="btn-auth" id="regSubmitBtn">Register</button>
+            </form>
+            <div id="licenseResult" class="result-message"></div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>© 2026 Mulino Corporation — Built for Windows power users. All rights reserved.</p>
+    </footer>
+
     <script>
-        function downloadFile() {
-            const fileUrl = 'https://github.com/Mulino-Y/Velocity/releases/download/v4.2/velocity_setup.exe';
-            const link = document.createElement('a');
-            link.href = fileUrl;
-            link.download = 'Velocity.exe';
-            link.click();
+        // ── Theme Toggle ──
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('velocity_theme', next);
+            document.getElementById('themeToggle').textContent = next === 'light' ? '☀️' : '🌙';
+        }
+        (function () {
+            const saved = localStorage.getItem('velocity_theme') || 'dark';
+            if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            document.getElementById('themeToggle').textContent = saved === 'light' ? '☀️' : '🌙';
+        })();
+
+        // ── Auth State ──
+        document.addEventListener("DOMContentLoaded", () => {
+            const key = localStorage.getItem('license_key');
+            if (key && key.length === 16) {
+                document.getElementById('navDownloadBtn').style.display = 'inline-block';
+                document.getElementById('navProfileBtn').style.display = 'inline-block';
+                document.getElementById('navLogoutBtn').style.display = 'inline-block';
+                document.getElementById('navLoginBtn').style.display = 'none';
+            }
+        });
+
+        function logoutUser() {
+            localStorage.removeItem('license_key');
+            localStorage.removeItem('user_email');
+            localStorage.removeItem('user_name');
+            location.reload();
+        }
+
+        document.getElementById('downloadNowBtn').addEventListener('click', function () {
+            const key = localStorage.getItem('license_key');
+            if (key && key.length === 16) {
+                window.location.href = 'download/index.html';
+            } else {
+                window.location.href = 'auth/index.html';
+            }
+        });
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const app = initializeApp({ projectId: "velocity-ff934" });
+        const db = getFirestore(app);
+
+        function generateLicenseKey(length = 16) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+            return result;
+        }
+
+        const regForm = document.getElementById('registrationForm');
+        if (regForm) {
+            regForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const btn = document.getElementById('regSubmitBtn');
+                const result = document.getElementById('licenseResult');
+                btn.disabled = true;
+                btn.textContent = 'Registering...';
+
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+
+                try {
+                    // Check if user already exists
+                    const q = query(
+                        collection(db, "licenses"),
+                        where("email", "==", email),
+                        where("phone", "==", phone)
+                    );
+                    const snapshot = await getDocs(q);
+
+                    if (!snapshot.empty) {
+                        const licenseDoc = snapshot.docs[0];
+                        const data = licenseDoc.data();
+
+                        if (!data.is_active) {
+                            result.className = 'result-message error';
+                            result.style.display = 'block';
+                            result.textContent = '✕ Your license has been deactivated.';
+                            btn.disabled = false;
+                            btn.textContent = 'Register';
+                            return;
+                        }
+
+                        localStorage.setItem('license_key', data.license_key);
+                        localStorage.setItem('user_email', data.email);
+                        localStorage.setItem('user_name', data.name || '');
+
+                        document.getElementById('navDownloadBtn').style.display = 'inline-block';
+                        document.getElementById('navProfileBtn').style.display = 'inline-block';
+                        document.getElementById('navLogoutBtn').style.display = 'inline-block';
+                        document.getElementById('navLoginBtn').style.display = 'none';
+
+                        result.className = 'result-message success';
+                        result.style.display = 'block';
+                        result.textContent = '✓ Account found! Logging in...';
+                        setTimeout(() => { window.location.href = 'profile/index.html'; }, 1000);
+                        return;
+                    }
+                } catch (err) {
+                    console.error("Error checking existing user:", err);
+                }
+
+                const license_key = generateLicenseKey(16);
+                const now = new Date();
+
+                const data = {
+                    name, email, phone, license_key,
+                    created_at: now.toISOString(),
+                    expires_at: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    is_active: true,
+                    hardware_id: ""
+                };
+
+                try {
+                    await setDoc(doc(db, "licenses", license_key), data);
+                    result.className = 'result-message success';
+                    result.style.display = 'block';
+                    result.innerHTML = `<strong>✓ Registration successful!</strong><div class="license-display"><input type="text" value="${license_key}" readonly onclick="this.select()"></div><p style="margin-top:8px;font-size:0.85rem;color:var(--text-secondary);">Copy this key and use your <b>email + phone</b> to log in.</p>`;
+                    regForm.reset();
+                } catch (err) {
+                    result.className = 'result-message error';
+                    result.style.display = 'block';
+                    result.textContent = '✕ Registration failed. Please try again.';
+                }
+                btn.disabled = false;
+                btn.textContent = 'Register';
+            });
         }
     </script>
 </body>
+
 </html>

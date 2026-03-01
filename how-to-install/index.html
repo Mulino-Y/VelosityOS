@@ -1,44 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How to Install - Velocity</title>
+    <meta name="description" content="How to install Velocity on your Windows PC.">
+    <title>How to Install — Velocity</title>
     <link rel="stylesheet" href="../style.css">
 </head>
+
 <body>
     <nav class="navbar">
         <a href="../index.html" class="navbar-logo">Velocity</a>
         <div class="nav-links">
             <a href="../index.html" class="nav-button">Home</a>
-            <a href="../how-to-use/index.html" class="nav-button">How to use</a>
-            <a href="../how-to-install/index.html" class="nav-button">How to install</a>
-            <a href="https://github.com/Mulino-Y/Velocity/releases/download/v4.2/velocity_setup.exe" class="nav-button">Download</a>
+            <a href="../how-to-use/index.html" class="nav-button">How to Use</a>
+            <a href="index.html" class="nav-button">How to Install</a>
+            <a href="../download/index.html" class="nav-button" id="navDownloadBtn" style="display:none;">Download</a>
+            <a href="../profile/index.html" class="nav-button nav-profile" id="navProfileBtn"
+                style="display:none;">Profile</a>
+            <a href="#" class="nav-button nav-logout" id="navLogoutBtn" style="display:none;" onclick="logoutUser()">Log
+                Out</a>
+            <a href="../auth/index.html#login" class="nav-button nav-login" id="navLoginBtn">Log In</a>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
         </div>
     </nav>
 
-    <main class="content">
-        <section class="section">
-            <h2>How to Install Velocity</h2>
-            
+    <div class="content">
+        <div class="section fade-in">
+            <h2>How to Install</h2>
+            <p>Setting up Velocity takes just a few minutes. Follow these steps to get started.</p>
+
             <div class="steps">
-                <div class="step">
+                <div class="step fade-in fade-in-delay-1">
                     <div class="step-number">1</div>
                     <h3>Download the File</h3>
-                    <p>Click the Download button and save the installer to your computer</p>
+                    <p>Click the Download button and save the installer to your computer.</p>
                 </div>
-                <div class="step">
+
+                <div class="step fade-in">
                     <div class="step-number">2</div>
-                    <h3>Extract zip</h3>
-                    <p>Locate the file and extract exe file to any folder you want</p>
+                    <h3>Disable Defender</h3>
+                    <p>Before installing, you must temporarily disable Windows Defender to prevent interference.</p>
                 </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <h3>Launch & Enjoy</h3>
-                    <p>Installation complete - open Velocity and start optimizing</p>
+                <div class="step fade-in fade-in-delay-2">
+                    <div class="step-number">3</div>
+                    <h3>Run as Administrator</h3>
+                    <p>Right-click the installer and select "Run as administrator" for full access</p>
                 </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2026 Mulino Corporation — Built for Windows power users. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('velocity_theme', next);
+            document.getElementById('themeToggle').textContent = next === 'light' ? '☀️' : '🌙';
+        }
+        (function () {
+            const saved = localStorage.getItem('velocity_theme') || 'dark';
+            if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            document.getElementById('themeToggle').textContent = saved === 'light' ? '☀️' : '🌙';
+        })();
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const key = localStorage.getItem('license_key');
+            if (key && key.length === 16) {
+                document.getElementById('navDownloadBtn').style.display = 'inline-block';
+                document.getElementById('navProfileBtn').style.display = 'inline-block';
+                document.getElementById('navLogoutBtn').style.display = 'inline-block';
+                document.getElementById('navLoginBtn').style.display = 'none';
+            }
+        });
+
+        function logoutUser() {
+            localStorage.removeItem('license_key');
+            localStorage.removeItem('user_email');
+            localStorage.removeItem('user_name');
+            location.reload();
+        }
+    </script>
 </body>
+
 </html>

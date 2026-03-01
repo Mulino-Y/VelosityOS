@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Log in or register for your Velocity license key.">
+    <title>Auth — Velocity</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="navbar-logo">Velocity</a>
+        <div class="nav-links">
+            <a href="../index.html" class="nav-button">Home</a>
+            <a href="../how-to-use/index.html" class="nav-button">How to Use</a>
+            <a href="../how-to-install/index.html" class="nav-button">How to Install</a>
+            <a href="../download/index.html" class="nav-button" id="navDownloadBtn" style="display:none;">Download</a>
+            <a href="../profile/index.html" class="nav-button nav-profile" id="navProfileBtn"
+                style="display:none;">Profile</a>
+            <a href="#" class="nav-button nav-logout" id="navLogoutBtn" style="display:none;" onclick="logoutUser()">Log
+                Out</a>
+            <a href="index.html#login" class="nav-button nav-login" id="navLoginBtn">Log In</a>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+        </div>
+    </nav>
+
+    <main class="auth-container">
+        <div class="auth-card fade-in">
+            <!-- ═══ Register View ═══ -->
+            <div id="register-view">
+                <h2>Create Account</h2>
+                <p class="auth-subtitle">Register to get your free 7-day license key.</p>
+                <form id="registrationForm">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" placeholder="Your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+1 234 567 8900" required>
+                    </div>
+                    <button type="submit" class="btn-auth" id="regBtn">Register</button>
+                </form>
+                <div id="licenseResult" class="result-message"></div>
+                <div class="auth-toggle">
+                    Already have an account? <a href="#" id="show-login">Log In</a>
+                </div>
+            </div>
+
+            <!-- ═══ Login View ═══ -->
+            <div id="login-view" style="display:none;">
+                <h2>Welcome Back</h2>
+                <p class="auth-subtitle">Enter your email and phone number to log in.</p>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" name="loginEmail" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPhone">Phone</label>
+                        <input type="tel" id="loginPhone" name="loginPhone" placeholder="+1 234 567 8900" required>
+                    </div>
+                    <button type="submit" class="btn-auth" id="loginBtn">Log In</button>
+                </form>
+                <div id="loginResult" class="result-message"></div>
+                <div class="auth-toggle">
+                    Don't have an account? <a href="#" id="show-register">Register</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 Mulino Corporation — Built for Windows power users. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // ── Theme ──
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('velocity_theme', next);
+            document.getElementById('themeToggle').textContent = next === 'light' ? '☀️' : '🌙';
+        }
+        (function () {
+            const saved = localStorage.getItem('velocity_theme') || 'dark';
+            if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            document.getElementById('themeToggle').textContent = saved === 'light' ? '☀️' : '🌙';
+        })();
+
+        // ── Auth State ──
+        document.addEventListener("DOMContentLoaded", () => {
+            const key = localStorage.getItem('license_key');
+            if (key && key.length === 16) {
+                document.getElementById('navDownloadBtn').style.display = 'inline-block';
+                document.getElementById('navProfileBtn').style.display = 'inline-block';
+                document.getElementById('navLogoutBtn').style.display = 'inline-block';
+                document.getElementById('navLoginBtn').style.display = 'none';
+            }
+        });
+
+        function logoutUser() {
+            localStorage.removeItem('license_key');
+            localStorage.removeItem('user_email');
+            localStorage.removeItem('user_name');
+            location.reload();
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const app = initializeApp({ projectId: "velocity-ff934" });
+        const db = getFirestore(app);
+
+        function generateLicenseKey(len = 16) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < len; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+            return result;
+        }
+
+        // ── Toggle Views ──
+        function updateViewFromHash() {
+            if (window.location.hash === '#login') {
+                document.getElementById('register-view').style.display = 'none';
+                document.getElementById('login-view').style.display = 'block';
+            } else {
+                document.getElementById('login-view').style.display = 'none';
+                document.getElementById('register-view').style.display = 'block';
+            }
+        }
+        window.addEventListener('hashchange', updateViewFromHash);
+        updateViewFromHash();
+
+        document.getElementById('show-login').addEventListener('click', e => {
+            e.preventDefault();
+            window.location.hash = 'login';
+        });
+
+        document.getElementById('show-register').addEventListener('click', e => {
+            e.preventDefault();
+            window.location.hash = 'register';
+        });
+
+        // ── Registration ──
+        document.getElementById('registrationForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('regBtn');
+            const result = document.getElementById('licenseResult');
+            btn.disabled = true;
+            btn.textContent = 'Registering...';
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            try {
+                // Check if user already exists
+                const q = query(
+                    collection(db, "licenses"),
+                    where("email", "==", email),
+                    where("phone", "==", phone)
+                );
+                const snapshot = await getDocs(q);
+
+                if (!snapshot.empty) {
+                    const licenseDoc = snapshot.docs[0];
+                    const data = licenseDoc.data();
+
+                    if (!data.is_active) {
+                        result.className = 'result-message error';
+                        result.style.display = 'block';
+                        result.textContent = '✕ Your license has been deactivated.';
+                        btn.disabled = false;
+                        btn.textContent = 'Register';
+                        return;
+                    }
+
+                    localStorage.setItem('license_key', data.license_key);
+                    localStorage.setItem('user_email', data.email);
+                    localStorage.setItem('user_name', data.name || '');
+
+                    document.getElementById('navDownloadBtn').style.display = 'inline-block';
+                    document.getElementById('navProfileBtn').style.display = 'inline-block';
+                    document.getElementById('navLogoutBtn').style.display = 'inline-block';
+                    document.getElementById('navLoginBtn').style.display = 'none';
+
+                    result.className = 'result-message success';
+                    result.style.display = 'block';
+                    result.textContent = '✓ Account found! Logging in...';
+                    setTimeout(() => { window.location.href = '../profile/index.html'; }, 1000);
+                    return;
+                }
+            } catch (err) {
+                console.error("Error checking existing user:", err);
+            }
+
+            const license_key = generateLicenseKey(16);
+            const now = new Date();
+
+            const data = {
+                name, email, phone, license_key,
+                created_at: now.toISOString(),
+                expires_at: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                is_active: true,
+                hardware_id: ""
+            };
+
+            try {
+                await setDoc(doc(db, "licenses", license_key), data);
+                result.className = 'result-message success';
+                result.style.display = 'block';
+                result.innerHTML = `<strong>✓ Registration successful!</strong><div class="license-display"><input type="text" value="${license_key}" readonly onclick="this.select()"></div><p style="margin-top:8px;font-size:0.85rem;color:var(--text-secondary);">Save this key! You can log in with your <b>email + phone</b>.</p>`;
+                this.reset();
+            } catch (err) {
+                result.className = 'result-message error';
+                result.style.display = 'block';
+                result.textContent = '✕ Registration failed. Please try again.';
+            }
+            btn.disabled = false;
+            btn.textContent = 'Register';
+        });
+
+        // ── Login (email + phone) ──
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const result = document.getElementById('loginResult');
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const phone = document.getElementById('loginPhone').value.trim();
+
+            try {
+                // Query licenses collection where email AND phone match
+                const q = query(
+                    collection(db, "licenses"),
+                    where("email", "==", email),
+                    where("phone", "==", phone)
+                );
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    result.className = 'result-message error';
+                    result.style.display = 'block';
+                    result.textContent = '✕ No account found with this email and phone.';
+                } else {
+                    // Take the first matching license
+                    const licenseDoc = snapshot.docs[0];
+                    const data = licenseDoc.data();
+
+                    if (!data.is_active) {
+                        result.className = 'result-message error';
+                        result.style.display = 'block';
+                        result.textContent = '✕ Your license has been deactivated.';
+                    } else {
+                        // Save to localStorage
+                        localStorage.setItem('license_key', data.license_key);
+                        localStorage.setItem('user_email', data.email);
+                        localStorage.setItem('user_name', data.name || '');
+
+                        // Update navbar
+                        document.getElementById('navDownloadBtn').style.display = 'inline-block';
+                        document.getElementById('navProfileBtn').style.display = 'inline-block';
+                        document.getElementById('navLogoutBtn').style.display = 'inline-block';
+                        document.getElementById('navLoginBtn').style.display = 'none';
+
+                        result.className = 'result-message success';
+                        result.style.display = 'block';
+                        result.textContent = '✓ Login successful! Redirecting to profile...';
+                        setTimeout(() => { window.location.href = '../profile/index.html'; }, 1200);
+                    }
+                }
+            } catch (err) {
+                result.className = 'result-message error';
+                result.style.display = 'block';
+                result.textContent = '✕ Login failed. Please try again.';
+                console.error(err);
+            }
+            btn.disabled = false;
+            btn.textContent = 'Log In';
+        });
+    </script>
+</body>
+
+</html>

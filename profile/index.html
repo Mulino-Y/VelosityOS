@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Your Velocity profile — view your license details.">
+    <title>Profile — Velocity</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="navbar-logo">Velocity</a>
+        <div class="nav-links">
+            <a href="../index.html" class="nav-button">Home</a>
+            <a href="../how-to-use/index.html" class="nav-button">How to Use</a>
+            <a href="../how-to-install/index.html" class="nav-button">How to Install</a>
+            <a href="../download/index.html" class="nav-button" id="navDownloadBtn" style="display:none;">Download</a>
+            <a href="index.html" class="nav-button nav-profile" id="navProfileBtn" style="display:none;">Profile</a>
+            <a href="#" class="nav-button nav-logout" id="navLogoutBtn" style="display:none;" onclick="logoutUser()">Log
+                Out</a>
+            <a href="../auth/index.html#login" class="nav-button nav-login" id="navLoginBtn">Log In</a>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+        </div>
+    </nav>
+
+    <main class="profile-container">
+        <div class="profile-card fade-in" id="profileCard" style="display:none;">
+            <div class="profile-avatar" id="profileAvatar">👤</div>
+            <h2 id="profileName">—</h2>
+            <p class="profile-email" id="profileEmail">—</p>
+
+            <div class="profile-info">
+                <div class="profile-row">
+                    <span class="profile-row-label">License Key</span>
+                    <span class="profile-row-value license-key" id="profileLicense" title="Click to copy"
+                        onclick="copyLicense()">—</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-row-label">Status</span>
+                    <span class="profile-row-value" id="profileStatus">—</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-row-label">Expires</span>
+                    <span class="profile-row-value" id="profileExpiry">—</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-row-label">Registered</span>
+                    <span class="profile-row-value" id="profileCreated">—</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-row-label">Phone</span>
+                    <span class="profile-row-value" id="profilePhone">—</span>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button class="btn-copy" onclick="copyLicense()">📋 Copy License Key</button>
+            </div>
+        </div>
+
+        <!-- Not Logged In State -->
+        <div class="auth-card fade-in" id="notLoggedIn">
+            <h2>Not Logged In</h2>
+            <p class="auth-subtitle">Please log in to view your profile and license details.</p>
+            <a href="../auth/index.html#login" class="btn-auth"
+                style="display:block;text-align:center;text-decoration:none;">Go to Login</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 Mulino Corporation — Built for Windows power users. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // ── Theme ──
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('velocity_theme', next);
+            document.getElementById('themeToggle').textContent = next === 'light' ? '☀️' : '🌙';
+        }
+        (function () {
+            const saved = localStorage.getItem('velocity_theme') || 'dark';
+            if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            document.getElementById('themeToggle').textContent = saved === 'light' ? '☀️' : '🌙';
+        })();
+
+        // ── Auth State ──
+        function logoutUser() {
+            localStorage.removeItem('license_key');
+            localStorage.removeItem('user_email');
+            localStorage.removeItem('user_name');
+            window.location.href = '../index.html';
+        }
+
+        function copyLicense() {
+            const key = document.getElementById('profileLicense').textContent;
+            if (key && key !== '—') {
+                navigator.clipboard.writeText(key).then(() => {
+                    const btn = document.querySelector('.btn-copy');
+                    btn.textContent = '✓ Copied!';
+                    setTimeout(() => { btn.textContent = '📋 Copy License Key'; }, 2000);
+                });
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const app = initializeApp({ projectId: "velocity-ff934" });
+        const db = getFirestore(app);
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const licenseKey = localStorage.getItem('license_key');
+
+            if (!licenseKey || licenseKey.length !== 16) {
+                // Not logged in
+                document.getElementById('notLoggedIn').style.display = 'block';
+                document.getElementById('profileCard').style.display = 'none';
+                return;
+            }
+
+            // Show logged-in navbar
+            document.getElementById('navDownloadBtn').style.display = 'inline-block';
+            document.getElementById('navProfileBtn').style.display = 'inline-block';
+            document.getElementById('navLogoutBtn').style.display = 'inline-block';
+            document.getElementById('navLoginBtn').style.display = 'none';
+
+            // Hide "not logged in" block
+            document.getElementById('notLoggedIn').style.display = 'none';
+            document.getElementById('profileCard').style.display = 'block';
+
+            try {
+                const docRef = doc(db, "licenses", licenseKey);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+
+                    // Avatar initial
+                    const name = data.name || 'User';
+                    document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+
+                    // Name & Email
+                    document.getElementById('profileName').textContent = name;
+                    document.getElementById('profileEmail').textContent = data.email || '—';
+
+                    // License Key
+                    document.getElementById('profileLicense').textContent = data.license_key || licenseKey;
+
+                    // Status
+                    const statusEl = document.getElementById('profileStatus');
+                    if (data.is_active) {
+                        statusEl.textContent = 'Active';
+                        statusEl.classList.add('status-active');
+                    } else {
+                        statusEl.textContent = 'Inactive';
+                        statusEl.classList.add('status-expired');
+                    }
+
+                    // Expiry
+                    if (data.expires_at) {
+                        const expiry = new Date(data.expires_at);
+                        const now = new Date();
+                        const expiryStr = expiry.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                        const expiryEl = document.getElementById('profileExpiry');
+                        expiryEl.textContent = expiryStr;
+                        if (now > expiry) {
+                            expiryEl.classList.add('status-expired');
+                            expiryEl.textContent += ' (Expired)';
+                        }
+                    }
+
+                    // Created
+                    if (data.created_at) {
+                        document.getElementById('profileCreated').textContent =
+                            new Date(data.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                    }
+
+                    // Phone
+                    document.getElementById('profilePhone').textContent = data.phone || '—';
+
+                    // Save name/email locally
+                    localStorage.setItem('user_name', name);
+                    localStorage.setItem('user_email', data.email || '');
+                } else {
+                    document.getElementById('profileName').textContent = 'License Not Found';
+                    document.getElementById('profileEmail').textContent = 'The license key in your session is invalid.';
+                }
+            } catch (err) {
+                console.error('Profile load error:', err);
+                document.getElementById('profileName').textContent = 'Error Loading Profile';
+                document.getElementById('profileEmail').textContent = 'Could not connect to the server.';
+            }
+        });
+    </script>
+</body>
+
+</html>

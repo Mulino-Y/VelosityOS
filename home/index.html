@@ -1,37 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Velocity</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="description" content="Velocity home — your Windows optimization dashboard.">
+    <title>Home — Velocity</title>
+    <link rel="stylesheet" href="../style.css">
 </head>
+
 <body>
     <nav class="navbar">
-        <a href="../index.html" class="nav-button">Home</a>
-        <a href="../how-to-use/index.html" class="nav-button">How to use</a>
-        <a href="../how-to-install/index.html" class="nav-button">How to install</a>
+        <a href="../index.html" class="navbar-logo">Velocity</a>
+        <div class="nav-links">
+            <a href="../index.html" class="nav-button">Home</a>
+            <a href="../how-to-use/index.html" class="nav-button">How to Use</a>
+            <a href="../how-to-install/index.html" class="nav-button">How to Install</a>
+            <a href="../download/index.html" class="nav-button" id="navDownloadBtn" style="display:none;">Download</a>
+            <a href="../profile/index.html" class="nav-button nav-profile" id="navProfileBtn"
+                style="display:none;">Profile</a>
+            <a href="#" class="nav-button nav-logout" id="navLogoutBtn" style="display:none;" onclick="logoutUser()">Log
+                Out</a>
+            <a href="../auth/index.html#login" class="nav-button nav-login" id="navLoginBtn">Log In</a>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+        </div>
     </nav>
 
-    <main class="content">
-        <section class="intro">
-            <h1>Welcome to Velocity</h1>
-            <p>Velocity is your ultimate solution for optimizing your Windows system. With just a few clicks, you can clean, boost, and optimize your computer for peak performance.</p>
-        </section>
+    <section class="hero" style="min-height:70vh;">
+        <div class="hero-content">
+            <h1 class="fade-in">Welcome to <span class="gradient-text">Velocity</span></h1>
+            <p class="fade-in fade-in-delay-1">Your all-in-one Windows optimization toolkit. Clean, boost, and optimize
+                — effortlessly.</p>
+            <div class="fade-in fade-in-delay-2" style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+                <button class="btn-primary" id="downloadBtn">⬇ Download Now</button>
+                <a href="../how-to-use/index.html" class="btn-secondary">Learn More →</a>
+            </div>
+        </div>
+    </section>
 
-        <section class="download-section">
-            <button class="download-btn" onclick="downloadFile()">Download Now</button>
-        </section>
-    </main>
+    <footer class="footer">
+        <p>© 2026 Mulino Corporation — Built for Windows power users. All rights reserved.</p>
+    </footer>
 
     <script>
-        function downloadFile() {
-            const fileUrl = 'https://github.com/Mulino-Y/Velocity/releases/download/v4.2/velocity_setup.exe';
-            const link = document.createElement('a');
-            link.href = fileUrl;
-            link.download = 'Velocity.exe';
-            link.click();
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('velocity_theme', next);
+            document.getElementById('themeToggle').textContent = next === 'light' ? '☀️' : '🌙';
         }
+        (function () {
+            const saved = localStorage.getItem('velocity_theme') || 'dark';
+            if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            document.getElementById('themeToggle').textContent = saved === 'light' ? '☀️' : '🌙';
+        })();
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const key = localStorage.getItem('license_key');
+            if (key && key.length === 16) {
+                document.getElementById('navDownloadBtn').style.display = 'inline-block';
+                document.getElementById('navProfileBtn').style.display = 'inline-block';
+                document.getElementById('navLogoutBtn').style.display = 'inline-block';
+                document.getElementById('navLoginBtn').style.display = 'none';
+            }
+        });
+
+        function logoutUser() {
+            localStorage.removeItem('license_key');
+            localStorage.removeItem('user_email');
+            localStorage.removeItem('user_name');
+            location.reload();
+        }
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const key = localStorage.getItem('license_key');
+            if (key && key.length === 16) {
+                window.location.href = '../download/index.html';
+            } else {
+                window.location.href = '../auth/index.html';
+            }
+        });
     </script>
 </body>
+
 </html>
